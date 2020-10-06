@@ -39,37 +39,42 @@ videos$category[videos$category == "28"] <- "Science & Technology"
 videos$category[videos$category == "29"] <- "Nonprofits & Activism"
 videos$category[videos$category == "43"] <- "Shows"
 
-
+#Changing the date format of trending date column
 videos$trending_date <- ydm(videos$trending_date)
 
 videos$publish_time <- ymd(substr(videos$publish_time,start = 1,stop = 10))
 
+#Creating a new column "dif_days" which is the difference of publish time and trending time for any video
 videos$dif_days <- videos$trending_date-videos$publish_time
 
 videos_dif <- subset(videos, videos[,17] < 30)
 
 RColorBrewer::brewer.pal.info
 
+#Creating a barplot for time it takes for videos to trend
 ggplot(data = videos_dif, aes(x = as.factor(dif_days), fill = as.factor(dif_days))) + 
   geom_bar(color = "black") + theme(legend.position = "none") + xlab("No. of Days") + ylab("No. of Videos") +
   ggtitle("Time it takes for Videos to Trend") + ylim(c(0,5000)) + scale_color_grey()
 
-
+#Creating the dataframe with cateogries and dif_days
 diff_days <- data.frame(videos$category, videos$dif_days)
+
+#Calculating the average of days it takes for videos to start trending for each category
 diff_days <- aggregate(diff_days$videos.dif_days, list(diff_days$videos.category), FUN = mean)
 diff_days$x <- as.integer(diff_days$x)
 str(diff_days)
 
+#creating barplot for time taken by each category to start trending
 ggplot(data = diff_days, aes(x = reorder(Group.1, -x), y = x, fill = as.factor(x))) + 
   geom_bar(stat = "identity", color = "black") + ylim(c(0,50)) + 
   theme(legend.position = "none") + coord_flip() + 
   ggtitle("Time Taken by Videos of Each Category to Trend") + xlab("Categories") + ylab("No. of Days")
 
-
+#Creating boxplot for number of views for each category
 ggplot(data = videos, aes(x = category, y = views)) + geom_boxplot(aes( fill = category)) + 
   ylim(c(0, 4000000)) + theme(legend.position = "none") + theme_minimal()
 
-
+#Creating a boxplot for number of likes for each category
 ggplot(data = videos, aes(x = category, y = likes)) + geom_boxplot(aes( fill = category)) + 
   ylim(c(0, 150000)) + theme(legend.position = "none") + theme_minimal()
                               
